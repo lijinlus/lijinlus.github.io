@@ -1,0 +1,82 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import FormattedDate from "../components/FormattedDate.astro";
+import { getCollection } from "astro:content";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+const recent = posts.slice(0, 5);
+---
+
+<BaseLayout>
+  <section class="intro">
+    <h1>{SITE_TITLE}</h1>
+    <p class="lede">{SITE_DESCRIPTION}</p>
+  </section>
+
+  <section class="recent">
+    <h2>最近的文章</h2>
+    <ul class="post-list">
+      {
+        recent.map((post) => (
+          <li>
+            <a class="title" href={`/blog/${post.id}`}>
+              {post.data.title}
+            </a>
+            <FormattedDate date={post.data.pubDate} />
+            <p class="desc">{post.data.description}</p>
+          </li>
+        ))
+      }
+    </ul>
+    {posts.length > recent.length && <a class="more" href="/blog">全部文章 →</a>}
+  </section>
+
+  <style>
+    .intro {
+      margin-bottom: 3.5rem;
+    }
+    .lede {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .post-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .post-list li {
+      padding-block: 1.25rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .post-list .title {
+      display: block;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      border: none;
+      margin-bottom: 0.15rem;
+    }
+    .post-list .title:hover {
+      background: none;
+      color: var(--accent);
+    }
+    .post-list time {
+      font-size: 0.85rem;
+      color: var(--text-faint);
+    }
+    .post-list .desc {
+      margin: 0.4rem 0 0;
+      color: var(--text-muted);
+      font-size: 0.98rem;
+    }
+    .more {
+      display: inline-block;
+      margin-top: 1.5rem;
+      border: none;
+    }
+  </style>
+</BaseLayout>
